@@ -30,9 +30,9 @@ public class Home extends  JFrame {
     private  JTable tblNhanKhau;
     private DefaultTableModel dtmNhanKhau;
     private  JMenu exit;
-    private  JButton jButton1;
+    private  JButton btnThongKe;
     private  JButton btnChiTiet;
-    private  JComboBox<String> jComboBox1;
+    private  JComboBox<String> cboThongKe;
     private  JPanel jPanel1;
     private  JMenu logOut;
     private  JMenuBar menuBar;
@@ -49,6 +49,7 @@ public class Home extends  JFrame {
         setLocation(0,0);
         addEvent();
     }
+ 
     
     private void addEvent() {
 		handlingTable();
@@ -99,6 +100,7 @@ public class Home extends  JFrame {
 				t.setHinhThuc(pnSf.getTxtHinhThuc().getText());
 				t.setThoiDiem(DateConverter.stringToDate(pnSf.getTxtThoiGian().getText()));
 				t.setKetQua(pnSf.getTxtKetQua().getText());
+				t.setLichTrinh(pnSf.getLichTrinh().getText());
 				int kq = TrangThaiService.insertTrangThai(t);
 				if(kq > 0) {
 					JOptionPane.showMessageDialog(null, "Inserted!");
@@ -144,6 +146,7 @@ public class Home extends  JFrame {
 				t.setHinhThuc(pnSf.getTxtHinhThuc().getText());
 				t.setThoiDiem(DateConverter.stringToDate(pnSf.getTxtThoiGian().getText()));
 				t.setKetQua(pnSf.getTxtKetQua().getText());
+				t.setLichTrinh(pnSf.getLichTrinh().getText());
 				int kq = TrangThaiService.updateTrangThai(t);
 				if(kq > 0) {
 					JOptionPane.showMessageDialog(null, "Updated!");
@@ -173,7 +176,46 @@ public class Home extends  JFrame {
 			}
 		});
 		
+		
+		btnThongKe.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int x = cboThongKe.getSelectedIndex();
+				System.out.println(x);
+				if(x <= 0) {
+					handlingTable();
+				}
+				else if(x == 1) {
+					handlingFilter("Dương tính", 1);
+				}
+				else if(x == 2) {
+					handlingFilter("Âm tính", 1);
+				}
+				else if(x == 3) {
+					handlingFilter("Xét nghiệm virus", 2);
+				}
+				else if(x == 4) {
+					handlingFilter("Xét nghiệm kháng thể", 2);
+				}
+				else {
+					return;
+				}
+			}
+		});
 	}
+
+	protected void handlingFilter(String inf, int x) {
+		TrangThaiService tts = new TrangThaiService(LoginUI.idCanBo);
+		ArrayList<TrangThai> dsTT = tts.filter(inf, x);
+		dtmNhanKhau.setRowCount(0);
+		for(TrangThai t : dsTT) {
+			Object[] infor = {t.getIdNhanKhau(), t.getThoiGianCachLy(), t.getMucDoCachLy(),
+					t.getTestCovid(), t.getHinhThuc(), t.getThoiDiem(), t.getKetQua()};
+			dtmNhanKhau.addRow(infor);
+		}
+	}
+
 
 	public void getInformation() {
 		int row = tblNhanKhau.getSelectedRow();
@@ -193,14 +235,15 @@ public class Home extends  JFrame {
 		pnSf.getTxtDanToc().setText(nk.getDanToc());
 		pnSf.getTxtDiaChi().setText(nk.getNguyenQuan());
 		pnSf.getTxtNoiSinh().setText(nk.getNoiSinh());
-		pnSf.getCboKhaiBao().setSelectedItem(t.getTtkb());
-		pnSf.getTxtTinhTrang().setText(t.getTtsk());
+		pnSf.getCboKhaiBao().setSelectedItem(t.getTtkb().trim());
+		pnSf.getTxtTinhTrang().setText(t.getTtsk().replace(';', ','));
 		pnSf.getCboMucDo().setSelectedItem("Level " + t.getMucDoCachLy());
 		pnSf.getTxtTGCachLy().setText(DateConverter.dateToString(t.getThoiGianCachLy()));
 		pnSf.getCboLanTest().setSelectedItem(t.getTestCovid());
 		pnSf.getTxtHinhThuc().setText(t.getHinhThuc());
 		pnSf.getTxtThoiGian().setText(DateConverter.dateToString(t.getThoiDiem()));
 		pnSf.getTxtKetQua().setText(t.getKetQua());
+		pnSf.getLichTrinh().setText(t.getLichTrinh());
 	}
 
 	public void handlingTable() {
@@ -222,8 +265,8 @@ public class Home extends  JFrame {
         btnDelete = new  JButton();
         showListPanel = new  JScrollPane();
         tblNhanKhau = new  JTable();
-        jButton1 = new  JButton();
-        jComboBox1 = new  JComboBox<>();
+        btnThongKe = new  JButton();
+        cboThongKe = new  JComboBox<>();
         btnChiTiet = new  JButton();
         btnExit = new  JButton();
         menuBar = new  JMenuBar();
@@ -260,14 +303,14 @@ public class Home extends  JFrame {
 		JScrollPane jScrollPane1 = new JScrollPane(tblNhanKhau, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         showListPanel.setViewportView(tblNhanKhau);
 
-        jButton1.setFont(new java.awt.Font("Arial", 0, 14));  
-        jButton1.setIcon(new  ImageIcon("icon\\statistics.png"));  
-        jButton1.setText("Thống kê");
-        jButton1.setPreferredSize(new java.awt.Dimension(93, 29));
+        btnThongKe.setFont(new java.awt.Font("Arial", 0, 14));  
+        btnThongKe.setIcon(new  ImageIcon("icon\\statistics.png"));  
+        btnThongKe.setText("Thống kê");
+        btnThongKe.setPreferredSize(new java.awt.Dimension(93, 29));
 
-        jComboBox1.setFont(new java.awt.Font("Arial", 0, 14));  
-        jComboBox1.setModel(new  DefaultComboBoxModel<>(new String[] { "Dương tính", "Âm tính", "Đã cách ly", "Chưa cách ly" }));
-
+        cboThongKe.setFont(new java.awt.Font("Arial", 0, 14));  
+        cboThongKe.setModel(new  DefaultComboBoxModel<>(new String[] { ">> clear filter <<", "Dương tính", "Âm tính", "XN virus", "XN kháng thể" }));
+        
         btnChiTiet.setFont(new java.awt.Font("Arial", 0, 14));  
         btnChiTiet.setIcon(new  ImageIcon("icon\\eye.png"));  
         btnChiTiet.setText("Xem chi tiết");
@@ -282,11 +325,11 @@ public class Home extends  JFrame {
                     .add(showListPanel)
                     .add(jPanel1Layout.createSequentialGroup()
                         .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(jButton1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)
+                            .add(btnThongKe, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)
                             .add(btnAdd, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .add(67, 67, 67)
                         .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                            .add(jComboBox1, 0, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .add(cboThongKe, 0, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .add(btnChiTiet, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .add(70, 70, 70)
                         .add(btnEdit)
@@ -305,8 +348,8 @@ public class Home extends  JFrame {
                     .add(btnChiTiet, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 29, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .add(29, 29, 29)
                 .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                    .add(jButton1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 33, Short.MAX_VALUE)
-                    .add(jComboBox1))
+                    .add(btnThongKe, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 33, Short.MAX_VALUE)
+                    .add(cboThongKe))
                 .add(22, 22, 22)
                 .add(showListPanel, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(57, Short.MAX_VALUE))
